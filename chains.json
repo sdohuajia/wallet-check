@@ -1,0 +1,234 @@
+{
+    "ethereum": {
+        "chainId": 1,
+        "name": "Ethereum",
+        "rpc": [
+            "https://eth.llamarpc.com",
+            "https://rpc.ankr.com/eth",
+            "https://ethereum.publicnode.com"
+        ],
+        "explorer": "https://etherscan.io",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        }
+    },
+    "bsc": {
+        "chainId": 56,
+        "name": "BNB Smart Chain",
+        "rpc": [
+            "https://bsc-dataseed.binance.org",
+            "https://rpc.ankr.com/bsc",
+            "https://bsc.publicnode.com"
+        ],
+        "explorer": "https://bscscan.com",
+        "nativeCurrency": {
+            "name": "BNB",
+            "symbol": "BNB",
+            "decimals": 18
+        }
+    },
+    "polygon": {
+        "chainId": 137,
+        "name": "Polygon",
+        "rpc": [
+            "https://polygon-rpc.com",
+            "https://rpc.ankr.com/polygon",
+            "https://polygon.llamarpc.com"
+        ],
+        "explorer": "https://polygonscan.com",
+        "nativeCurrency": {
+            "name": "MATIC",
+            "symbol": "MATIC",
+            "decimals": 18
+        }
+    },
+    "arbitrum": {
+        "chainId": 42161,
+        "name": "Arbitrum One",
+        "rpc": [
+            "https://arb1.arbitrum.io/rpc",
+            "https://rpc.ankr.com/arbitrum",
+            "https://arbitrum.llamarpc.com"
+        ],
+        "explorer": "https://arbiscan.io",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        }
+    },
+    "optimism": {
+        "chainId": 10,
+        "name": "Optimism",
+        "rpc": [
+            "https://mainnet.optimism.io",
+            "https://rpc.ankr.com/optimism",
+            "https://optimism.llamarpc.com"
+        ],
+        "explorer": "https://optimistic.etherscan.io",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        }
+    },
+    "base": {
+        "chainId": 8453,
+        "name": "Base",
+        "rpc": [
+            "https://mainnet.base.org",
+            "https://base.llamarpc.com",
+            "https://base.publicnode.com"
+        ],
+        "explorer": "https://basescan.org",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        }
+    },
+    "avalanche": {
+        "chainId": 43114,
+        "name": "Avalanche C-Chain",
+        "rpc": [
+            "https://api.avax.network/ext/bc/C/rpc",
+            "https://rpc.ankr.com/avalanche",
+            "https://avalanche.public-rpc.com"
+        ],
+        "explorer": "https://snowtrace.io",
+        "nativeCurrency": {
+            "name": "Avalanche",
+            "symbol": "AVAX",
+            "decimals": 18
+        }
+    },
+    "fantom": {
+        "chainId": 250,
+        "name": "Fantom",
+        "rpc": [
+            "https://rpc.ftm.tools",
+            "https://rpc.ankr.com/fantom",
+            "https://fantom.publicnode.com"
+        ],
+        "explorer": "https://ftmscan.com",
+        "nativeCurrency": {
+            "name": "Fantom",
+            "symbol": "FTM",
+            "decimals": 18
+        }
+    },
+    "linea": {
+        "chainId": 59144,
+        "name": "Linea",
+        "rpc": [
+            "https://rpc.linea.build",
+            "https://linea.drpc.org"
+        ],
+        "explorer": "https://lineascan.build",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        }
+    },
+    "zksync": {
+        "chainId": 324,
+        "name": "zkSync Era",
+        "rpc": [
+            "https://mainnet.era.zksync.io",
+            "https://zksync.drpc.org"
+        ],
+        "explorer": "https://explorer.zksync.io",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        }
+    },
+    "scroll": {
+        "chainId": 534352,
+        "name": "Scroll",
+        "rpc": [
+            "https://rpc.scroll.io",
+            "https://scroll.drpc.org"
+        ],
+        "explorer": "https://scrollscan.com",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        }
+    },
+    "mantle": {
+        "chainId": 5000,
+        "name": "Mantle",
+        "rpc": [
+            "https://rpc.mantle.xyz",
+            "https://mantle.drpc.org"
+        ],
+        "explorer": "https://explorer.mantle.xyz",
+        "nativeCurrency": {
+            "name": "MNT",
+            "symbol": "MNT",
+            "decimals": 18
+        }
+    },
+    "blast": {
+        "chainId": 81457,
+        "name": "Blast",
+        "rpc": [
+            "https://rpc.blast.io",
+            "https://blast.din.dev/rpc"
+        ],
+        "explorer": "https://blastscan.io",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        }
+    },
+    "opbnb": {
+        "chainId": 204,
+        "name": "opBNB",
+        "rpc": [
+            "https://opbnb-mainnet-rpc.bnbchain.org",
+            "https://opbnb.publicnode.com"
+        ],
+        "explorer": "https://opbnbscan.com",
+        "nativeCurrency": {
+            "name": "BNB",
+            "symbol": "BNB",
+            "decimals": 18
+        }
+    },
+    "celo": {
+        "chainId": 42220,
+        "name": "Celo",
+        "rpc": [
+            "https://forno.celo.org",
+            "https://rpc.ankr.com/celo"
+        ],
+        "explorer": "https://celoscan.io",
+        "nativeCurrency": {
+            "name": "CELO",
+            "symbol": "CELO",
+            "decimals": 18
+        }
+    },
+    "gnosis": {
+        "chainId": 100,
+        "name": "Gnosis Chain",
+        "rpc": [
+            "https://rpc.gnosischain.com",
+            "https://gnosis.publicnode.com"
+        ],
+        "explorer": "https://gnosisscan.io",
+        "nativeCurrency": {
+            "name": "xDAI",
+            "symbol": "xDAI",
+            "decimals": 18
+        }
+    }
+}

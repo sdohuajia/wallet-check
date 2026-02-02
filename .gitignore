@@ -1,0 +1,15 @@
+﻿node_modules/
+.next/
+out/
+dist/
+build/
+.env
+.env.local
+*.log
+.DS_Store
+.vercel/
+web-app/node_modules/
+web-app/.next/
+balances.json
+balances.csv
+test.js

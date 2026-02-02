@@ -1,0 +1,28 @@
+{
+  "name": "multi-chain-balance-checker",
+  "version": "1.0.0",
+  "description": "多链钱包余额查询工具 - 支持所有主流区块链网络",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node index.js --config config.example.json"
+  },
+  "keywords": [
+    "blockchain",
+    "wallet",
+    "balance",
+    "ethereum",
+    "bsc",
+    "polygon",
+    "multi-chain"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.10.0",
+    "axios": "^1.6.5",
+    "cli-table3": "^0.6.3",
+    "dotenv": "^16.3.1",
+    "csv-writer": "^1.6.0"
+  }
+}

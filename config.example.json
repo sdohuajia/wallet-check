@@ -1,0 +1,57 @@
+{
+    "wallets": [
+        "0x0000000000000000000000000000000000000000"
+    ],
+    "chains": [
+        "ethereum",
+        "bsc",
+        "polygon",
+        "arbitrum",
+        "optimism",
+        "base"
+    ],
+    "tokens": {
+        "ethereum": [
+            "USDT",
+            "USDC",
+            "WETH"
+        ],
+        "bsc": [
+            "USDT",
+            "USDC",
+            "WBNB"
+        ],
+        "polygon": [
+            "USDT",
+            "USDC",
+            "WMATIC"
+        ],
+        "arbitrum": [
+            "USDT",
+            "USDC",
+            "ARB"
+        ],
+        "optimism": [
+            "USDT",
+            "USDC",
+            "OP"
+        ],
+        "base": [
+            "USDC",
+            "WETH"
+        ]
+    },
+    "customRpc": {},
+    "output": {
+        "console": true,
+        "json": true,
+        "csv": true,
+        "jsonFile": "balances.json",
+        "csvFile": "balances.csv"
+    },
+    "options": {
+        "showZeroBalances": false,
+        "retryAttempts": 3,
+        "timeout": 30000
+    }
+}
