@@ -17,9 +17,15 @@ export const chains: Record<string, ChainConfig> = {
         chainId: 1,
         name: "Ethereum",
         rpc: [
+            "https://cloudflare-eth.com",
             "https://eth.llamarpc.com",
             "https://rpc.ankr.com/eth",
-            "https://ethereum.publicnode.com"
+            "https://ethereum.publicnode.com",
+            "https://1rpc.io/eth",
+            "https://eth.rpc.blxrbdn.com",
+            "https://virginia.rpc.blxrbdn.com",
+            "https://uk.rpc.blxrbdn.com",
+            "https://singapore.rpc.blxrbdn.com"
         ],
         explorer: "https://etherscan.io",
         nativeCurrency: {
@@ -30,11 +36,16 @@ export const chains: Record<string, ChainConfig> = {
     },
     bsc: {
         chainId: 56,
-        name: "BNB Smart Chain",
+        name: "BSC",
         rpc: [
-            "https://bsc-dataseed.binance.org",
+            "https://bsc-dataseed1.binance.org",
+            "https://bsc-dataseed2.binance.org",
+            "https://bsc-dataseed3.binance.org",
+            "https://bsc-dataseed4.binance.org",
             "https://rpc.ankr.com/bsc",
-            "https://bsc.publicnode.com"
+            "https://bsc.publicnode.com",
+            "https://1rpc.io/bnb",
+            "https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3"
         ],
         explorer: "https://bscscan.com",
         nativeCurrency: {
@@ -49,7 +60,9 @@ export const chains: Record<string, ChainConfig> = {
         rpc: [
             "https://polygon-rpc.com",
             "https://rpc.ankr.com/polygon",
-            "https://polygon.llamarpc.com"
+            "https://polygon.publicnode.com",
+            "https://1rpc.io/matic",
+            "https://polygon-bor.publicnode.com"
         ],
         explorer: "https://polygonscan.com",
         nativeCurrency: {

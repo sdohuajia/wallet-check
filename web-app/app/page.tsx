@@ -5,11 +5,14 @@ import { BalanceResult } from '@/lib/balance-checker';
 
 export default function Home() {
   const [address, setAddress] = useState('');
+  const [addresses, setAddresses] = useState(''); // 批量地址
+  const [isBatchMode, setIsBatchMode] = useState(false); // 批量模式开关
   const [chains, setChains] = useState<any[]>([]);
   const [tokens, setTokens] = useState<Record<string, any>>({});
   const [selectedChains, setSelectedChains] = useState<string[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<Record<string, string[]>>({});
-  const [results, setResults] = useState<BalanceResult[]>([]);
+  const [results, setResults] = useState<Record<string, BalanceResult[]>>({}); // 改为按地址分组
+  const [prices, setPrices] = useState<Record<string, number>>({}); // USD 价格
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -47,7 +50,12 @@ export default function Home() {
 
   // 查询余额
   const handleQuery = async () => {
-    if (!address) {
+    // 获取要查询的地址列表
+    const addressList = isBatchMode
+      ? addresses.split('\n').map(a => a.trim()).filter(a => a)
+      : [address.trim()];
+
+    if (addressList.length === 0) {
       setError('请输入钱包地址');
       return;
     }
@@ -59,25 +67,56 @@ export default function Home() {
 
     setLoading(true);
     setError('');
-    setResults([]);
+    setResults({});
 
     try {
-      const response = await fetch('/api/balance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          address,
-          selectedChains,
-          selectedTokens
-        })
+      const allResults: Record<string, BalanceResult[]> = {};
+
+      // 逐个查询每个地址
+      for (const addr of addressList) {
+        if (!addr) continue;
+
+        const response = await fetch('/api/balance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            address: addr,
+            selectedChains,
+            selectedTokens
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          allResults[addr] = data.results;
+        } else {
+          allResults[addr] = [];
+        }
+      }
+
+      setResults(allResults);
+
+      // 获取所有代币的价格
+      const allTokens = new Set<string>();
+      Object.values(allResults).forEach(balances => {
+        balances.forEach(b => allTokens.add(b.token));
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        setResults(data.results);
-      } else {
-        setError(data.error || '查询失败');
+      if (allTokens.size > 0) {
+        try {
+          const priceResponse = await fetch('/api/prices', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tokens: Array.from(allTokens) })
+          });
+          const priceData = await priceResponse.json();
+          if (priceData.success) {
+            setPrices(priceData.prices);
+          }
+        } catch (err) {
+          console.error('Failed to fetch prices:', err);
+        }
       }
     } catch (err: any) {
       setError(err.message || '网络错误');
@@ -99,14 +138,26 @@ export default function Home() {
 
   // 导出 CSV
   const exportCSV = () => {
-    const headers = ['链', '代币', '余额', '合约地址', '错误'];
-    const rows = results.map(r => [
-      r.chain,
-      r.token,
-      r.balance,
-      r.contractAddress || 'Native',
-      r.error || ''
-    ]);
+    const headers = ['钱包地址', '链', '代币', '余额', '价值(USD)', '合约地址', '错误'];
+    const rows: string[][] = [];
+
+    Object.entries(results).forEach(([wallet, balances]) => {
+      balances.forEach(r => {
+        const balance = parseFloat(r.balance);
+        const price = prices[r.token] || 0;
+        const usdValue = balance * price;
+
+        rows.push([
+          wallet,
+          r.chain,
+          r.token,
+          r.balance,
+          usdValue > 0 ? usdValue.toFixed(2) : '0',
+          r.contractAddress || 'Native',
+          r.error || ''
+        ]);
+      });
+    });
 
     const csvContent = [
       headers.join(','),
@@ -136,18 +187,44 @@ export default function Home() {
 
         {/* 主卡片 */}
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 md:p-8 shadow-2xl border border-white/20">
+          {/* 批量模式切换 */}
+          <div className="mb-4 flex items-center gap-3">
+            <button
+              onClick={() => setIsBatchMode(!isBatchMode)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${isBatchMode
+                ? 'bg-purple-500 text-white'
+                : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+            >
+              {isBatchMode ? '📋 批量模式' : '📝 单个地址'}
+            </button>
+            <span className="text-gray-400 text-sm">
+              {isBatchMode ? '每行一个地址' : '输入单个钱包地址'}
+            </span>
+          </div>
+
           {/* 钱包地址输入 */}
           <div className="mb-6">
             <label className="block text-white font-semibold mb-2">
-              钱包地址
+              钱包地址 {isBatchMode && `(${addresses.split('\n').filter(a => a.trim()).length} 个)`}
             </label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="0x..."
-              className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+            {isBatchMode ? (
+              <textarea
+                value={addresses}
+                onChange={(e) => setAddresses(e.target.value)}
+                placeholder="0x1234...&#10;0x5678...&#10;0xabcd..."
+                rows={6}
+                className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono text-sm"
+              />
+            ) : (
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="0x..."
+                className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            )}
           </div>
 
           {/* 链选择 */}
@@ -161,8 +238,8 @@ export default function Home() {
                   key={chain.key}
                   onClick={() => toggleChain(chain.key)}
                   className={`px-4 py-3 rounded-xl font-medium transition-all ${selectedChains.includes(chain.key)
-                      ? 'bg-purple-500 text-white shadow-lg scale-105'
-                      : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                    ? 'bg-purple-500 text-white shadow-lg scale-105'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
                     }`}
                 >
                   {chain.name}
@@ -195,8 +272,8 @@ export default function Home() {
                             key={tokenSymbol}
                             onClick={() => toggleToken(chainKey, tokenSymbol)}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${selectedTokens[chainKey]?.includes(tokenSymbol)
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-white/10 text-gray-300 hover:bg-white/20'
                               }`}
                           >
                             {tokenSymbol}
@@ -219,7 +296,7 @@ export default function Home() {
             >
               {loading ? '查询中...' : '🚀 开始查询'}
             </button>
-            {results.length > 0 && (
+            {Object.keys(results).length > 0 && (
               <>
                 <button
                   onClick={exportJSON}
@@ -245,66 +322,101 @@ export default function Home() {
           )}
 
           {/* 结果展示 */}
-          {results.length > 0 && (
+          {Object.keys(results).length > 0 && (
             <div className="mt-8">
               <h2 className="text-2xl font-bold text-white mb-4">
-                📊 查询结果
+                📊 查询结果 ({Object.keys(results).length} 个钱包)
               </h2>
-              <div className="bg-white/5 rounded-xl overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-white/10">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-white font-semibold">链</th>
-                        <th className="px-4 py-3 text-left text-white font-semibold">代币</th>
-                        <th className="px-4 py-3 text-right text-white font-semibold">余额</th>
-                        <th className="px-4 py-3 text-center text-white font-semibold">状态</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {results.map((result, idx) => (
-                        <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
-                          <td className="px-4 py-3 text-gray-300">{result.chain}</td>
-                          <td className="px-4 py-3 text-gray-300">{result.token}</td>
-                          <td className="px-4 py-3 text-right text-white font-mono">
-                            {parseFloat(result.balance) > 0
-                              ? parseFloat(result.balance).toLocaleString(undefined, {
-                                maximumFractionDigits: 6
-                              })
-                              : '0'}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            {result.error ? (
-                              <span className="text-red-400">❌</span>
-                            ) : parseFloat(result.balance) > 0 ? (
-                              <span className="text-green-400">✅</span>
-                            ) : (
-                              <span className="text-gray-500">-</span>
-                            )}
-                          </td>
+
+              {Object.entries(results).map(([wallet, balances]) => (
+                <div key={wallet} className="mb-6 bg-white/5 rounded-xl overflow-hidden">
+                  <div className="bg-white/10 px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <div className="text-white font-semibold font-mono text-sm">
+                        {wallet}
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        {balances.filter(r => parseFloat(r.balance) > 0).length} 个有余额
+                      </div>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-white/5">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-white font-semibold">链</th>
+                          <th className="px-4 py-3 text-left text-white font-semibold">代币</th>
+                          <th className="px-4 py-3 text-right text-white font-semibold">余额</th>
+                          <th className="px-4 py-3 text-right text-white font-semibold">价值 (USD)</th>
+                          <th className="px-4 py-3 text-center text-white font-semibold">状态</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {balances.map((result, idx) => (
+                          <tr key={idx} className="border-t border-white/10 hover:bg-white/5">
+                            <td className="px-4 py-3 text-gray-300">{result.chain}</td>
+                            <td className="px-4 py-3 text-gray-300">{result.token}</td>
+                            <td className="px-4 py-3 text-right text-white font-mono">
+                              {parseFloat(result.balance) > 0
+                                ? parseFloat(result.balance).toLocaleString(undefined, {
+                                  maximumFractionDigits: 6
+                                })
+                                : '0'}
+                            </td>
+                            <td className="px-4 py-3 text-right text-green-400 font-mono">
+                              {prices[result.token] && parseFloat(result.balance) > 0
+                                ? `$${(parseFloat(result.balance) * prices[result.token]).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2
+                                })}`
+                                : '-'}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {result.error ? (
+                                <span className="text-red-400">❌</span>
+                              ) : parseFloat(result.balance) > 0 ? (
+                                <span className="text-green-400">✅</span>
+                              ) : (
+                                <span className="text-gray-500">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              ))}
 
               {/* 统计信息 */}
-              <div className="mt-4 grid grid-cols-3 gap-4">
+              <div className="mt-4 grid grid-cols-4 gap-4">
+                <div className="bg-white/5 rounded-xl p-4 text-center">
+                  <div className="text-gray-400 text-sm">钱包数量</div>
+                  <div className="text-white text-2xl font-bold">{Object.keys(results).length}</div>
+                </div>
                 <div className="bg-white/5 rounded-xl p-4 text-center">
                   <div className="text-gray-400 text-sm">总查询数</div>
-                  <div className="text-white text-2xl font-bold">{results.length}</div>
+                  <div className="text-white text-2xl font-bold">
+                    {Object.values(results).flat().length}
+                  </div>
                 </div>
                 <div className="bg-white/5 rounded-xl p-4 text-center">
                   <div className="text-gray-400 text-sm">有余额</div>
                   <div className="text-green-400 text-2xl font-bold">
-                    {results.filter(r => parseFloat(r.balance) > 0).length}
+                    {Object.values(results).flat().filter(r => parseFloat(r.balance) > 0).length}
                   </div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-4 text-center">
-                  <div className="text-gray-400 text-sm">查询失败</div>
-                  <div className="text-red-400 text-2xl font-bold">
-                    {results.filter(r => r.error).length}
+                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-4 text-center">
+                  <div className="text-green-300 text-sm font-semibold">总价值 (USD)</div>
+                  <div className="text-green-400 text-2xl font-bold">
+                    ${Object.values(results).flat().reduce((total, r) => {
+                      const balance = parseFloat(r.balance);
+                      const price = prices[r.token] || 0;
+                      return total + (balance * price);
+                    }, 0).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
                   </div>
                 </div>
               </div>
